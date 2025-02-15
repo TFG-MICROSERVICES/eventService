@@ -27,6 +27,10 @@ module.exports = {
         type: Sequelize.TEXT,
         allowNull: true,
       },
+      event_type: {
+        type: Sequelize.ENUM("single", "tournament", "league"),
+        allowNull: false,
+      },
       status: {
         type: Sequelize.ENUM("0", "1", "2"),
         allowNull: false,
