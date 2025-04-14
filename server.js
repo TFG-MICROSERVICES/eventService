@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import morgan from 'morgan';
 import database from './db/database.js';
 import { EventEmitter } from 'events';
-
+import eventRoutes from './routes/eventRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -12,6 +12,8 @@ const port = process.env.PORT;
 EventEmitter.defaultMaxListeners = 30;
 app.use(express.json());
 app.use(morgan('combined'));
+
+app.use('/events', eventRoutes);
 
 app.use((req, res, next) => {
     res.status(404).json({

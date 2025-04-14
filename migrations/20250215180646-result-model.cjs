@@ -12,7 +12,6 @@ module.exports = {
                 },
                 event_id: {
                     type: Sequelize.STRING,
-                    unique: true,
                     allowNull: false,
                     references: {
                         model: 'Events',
@@ -23,22 +22,20 @@ module.exports = {
                 home_team_id: {
                     type: Sequelize.STRING,
                     max: 255,
-                    unique: true,
                     allowNull: false,
                 },
                 away_team_id: {
                     type: Sequelize.STRING,
                     max: 255,
-                    unique: true,
                     allowNull: false,
                 },
                 score_home: {
                     type: Sequelize.INTEGER,
-                    allowNull: false,
+                    allowNull: true,
                 },
                 score_away: {
                     type: Sequelize.INTEGER,
-                    allowNull: false,
+                    allowNull: true,
                 },
                 createdAt: {
                     type: Sequelize.DATE,
