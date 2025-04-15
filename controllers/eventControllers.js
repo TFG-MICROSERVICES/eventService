@@ -5,7 +5,9 @@ import { generateError } from '../utils/generateError.js';
 export const createEventController = async (req, res, next) => {
     try {
         const validatedEvent = await eventSchema.validateAsync(req.body);
+
         const event = await createEvent(validatedEvent);
+
         res.status(201).json({
             status: 201,
             message: 'Evento creado correctamente',

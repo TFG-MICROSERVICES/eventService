@@ -1,7 +1,12 @@
 import { DataTypes } from 'sequelize';
+import database from '../db/database.js';
+import { Tournament } from './tournament.js';
+import { League } from './league.js';
+import { Result } from './result.js';
 
-export const Event = (sequelize) => {
-    const Event = sequelize.define('Event', {
+export const Event = database.define(
+    'Event',
+    {
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
@@ -53,7 +58,18 @@ export const Event = (sequelize) => {
             type: DataTypes.DATE,
             allowNull: false,
         },
-    });
+    },
+    {
+        tableName: 'Events',
+    }
+);
 
-    return Event;
-};
+// // Definir las relaciones
+// Event.hasOne(Tournament, { foreignKey: 'event_id', sourceKey: 'event_id' });
+// Tournament.belongsTo(Event, { foreignKey: 'event_id', targetKey: 'event_id' });
+
+// Event.hasOne(League, { foreignKey: 'event_id', sourceKey: 'event_id' });
+// League.belongsTo(Event, { foreignKey: 'event_id', targetKey: 'event_id' });
+
+// Event.hasMany(Result, { foreignKey: 'event_id', sourceKey: 'event_id' });
+// Result.belongsTo(Event, { foreignKey: 'event_id', targetKey: 'event_id' });
