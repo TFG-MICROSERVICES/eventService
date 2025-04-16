@@ -30,7 +30,7 @@ export const League = (sequelize) => {
     League.associate = (models) => {
         League.belongsTo(models.Event, {
             foreignKey: 'event_id',
-            targetKey: 'event_id',
+            targetKey: 'id',
             onDelete: 'CASCADE',
         });
     };

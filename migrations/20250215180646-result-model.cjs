@@ -11,11 +11,12 @@ module.exports = {
                     autoIncrement: true,
                 },
                 event_id: {
-                    type: Sequelize.STRING,
+                    type: Sequelize.INTEGER,
+                    unique: true,
                     allowNull: false,
                     references: {
                         model: 'Events',
-                        key: 'event_id',
+                        key: 'id',
                     },
                     onDelete: 'CASCADE',
                 },

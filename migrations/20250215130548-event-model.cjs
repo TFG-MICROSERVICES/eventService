@@ -7,10 +7,6 @@ module.exports = {
             id: {
                 type: Sequelize.INTEGER,
                 autoIncrement: true,
-            },
-            event_id: {
-                type: Sequelize.STRING,
-                max: 255,
                 primaryKey: true,
             },
             sport_id: {
@@ -72,7 +68,7 @@ module.exports = {
 
         //Agregamos indices para mejorar rendimiento de busquedas
         await queryInterface.addIndex('Events', ['sport_id']);
-        await queryInterface.addIndex('Events', ['event_id']);
+        await queryInterface.addIndex('Events', ['id']);
     },
 
     async down(queryInterface, Sequelize) {

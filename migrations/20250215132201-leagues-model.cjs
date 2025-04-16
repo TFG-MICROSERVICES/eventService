@@ -10,12 +10,12 @@ module.exports = {
                 primaryKey: true,
             },
             event_id: {
-                type: Sequelize.STRING,
+                type: Sequelize.INTEGER,
                 unique: true,
                 allowNull: false,
                 references: {
                     model: 'Events',
-                    key: 'event_id',
+                    key: 'id',
                 },
                 onDelete: 'CASCADE',
             },
@@ -44,6 +44,8 @@ module.exports = {
                 defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
             },
         });
+
+        await queryInterface.addIndex('Leagues', ['event_id']);
     },
 
     async down(queryInterface, Sequelize) {

@@ -29,7 +29,7 @@ export const Tournament = (sequelize) => {
     Tournament.associate = (models) => {
         Tournament.belongsTo(models.Event, {
             foreignKey: 'event_id',
-            targetKey: 'event_id',
+            targetKey: 'id',
             onDelete: 'CASCADE',
         });
     };

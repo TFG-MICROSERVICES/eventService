@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 export const eventSchema = Joi.object({
-    sport_id: Joi.string().max(255).required().messages({
+    sport_id: Joi.number().required().messages({
         'number.empty': 'El ID del deporte no puede estar vacío',
         'any.required': 'El ID del deporte es requerido',
     }),
@@ -59,7 +59,7 @@ export const eventSchema = Joi.object({
 });
 
 export const updateEventSchema = Joi.object({
-    sport_id: Joi.string().max(255).required().messages({
+    sport_id: Joi.number().required().messages({
         'string.empty': 'El ID del deporte no puede estar vacío',
         'string.max': 'El ID del deporte no puede exceder los 255 caracteres',
         'any.required': 'El ID del deporte es requerido',

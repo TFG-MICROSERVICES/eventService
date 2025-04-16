@@ -1,9 +1,9 @@
 import { League } from '../../models/league.js';
 import { generateError } from '../../utils/generateError.js';
 
-export const createLeague = async (leagueData) => {
+export const createLeague = async (data) => {
     try {
-        const league = await League.create(leagueData);
+        const league = await League.create(data);
 
         return league;
     } catch (error) {
@@ -22,10 +22,10 @@ export const getLeagues = async () => {
     }
 };
 
-export const getLeagueById = async (leagueId) => {
+export const getLeagueById = async (event_id) => {
     try {
         const league = await League.findOne({
-            where: { event_id: leagueId },
+            where: { event_id: event_id },
         });
 
         if (!league) generateError('League not found', 404);
@@ -37,10 +37,10 @@ export const getLeagueById = async (leagueId) => {
     }
 };
 
-export const updateLeague = async (leagueId, leagueData) => {
+export const updateLeague = async (event_id, leagueData) => {
     try {
         const league = await League.findOne({
-            where: { event_id: leagueId },
+            where: { event_id: event_id },
         });
 
         if (!league) generateError('League not found', 404);
@@ -54,10 +54,10 @@ export const updateLeague = async (leagueId, leagueData) => {
     }
 };
 
-export const deleteLeague = async (leagueId) => {
+export const deleteLeague = async (event_id) => {
     try {
         const league = await League.findOne({
-            where: { event_id: leagueId },
+            where: { event_id: event_id },
         });
 
         if (!league) generateError('League not found', 404);

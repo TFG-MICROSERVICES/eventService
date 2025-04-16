@@ -10,11 +10,6 @@ export const Event = database.define(
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
-        },
-        event_id: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
             primaryKey: true,
         },
         sport_id: {
