@@ -19,10 +19,6 @@ module.exports = {
                 },
                 onDelete: 'CASCADE',
             },
-            number_of_teams: {
-                type: Sequelize.INTEGER,
-                allowNull: false,
-            },
             teams_max: {
                 type: Sequelize.INTEGER,
                 allowNull: false,

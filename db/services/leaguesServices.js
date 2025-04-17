@@ -56,7 +56,7 @@ export const updateLeague = async (event_id, leagueData) => {
 
 export const deleteLeague = async (event_id) => {
     try {
-        const league = await League.findOne({
+        const league = await League.findAll({
             where: { event_id: event_id },
         });
 

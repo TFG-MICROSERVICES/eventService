@@ -1,4 +1,4 @@
-import { createEvent, getEvents, getEventById, updateEvent, deleteEvent } from '../db/services/eventsServices.js';
+import { createEvent, getEvents, getEventById, updateEvent, deleteEvent, checkExistsNameEvent } from '../db/services/eventsServices.js';
 import { createLeague, getLeagueById, updateLeague } from '../db/services/leaguesServices.js';
 import { createTournament, getTournament, updateTournament } from '../db/services/tournamentServices.js';
 import { eventSchema, updateEventSchema } from '../schemas/eventSchema.js';
@@ -8,18 +8,24 @@ import { generateError } from '../utils/generateError.js';
 
 export const createEventController = async (req, res, next) => {
     try {
-        const validatedEvent = await eventSchema.validateAsync(req.body);
+        const validatedEvent = await eventSchema.validateAsync(req.body, { stripUnknown: true });
 
         const event = await createEvent(validatedEvent);
 
         if (event && validatedEvent.event_type === 'tournament') {
-            req.body.event_id = event;
-            const validateTournament = await tournamentSchema.validateAsync(req.body);
-            await createTournament(validateTournament);
+            req.body.event_id = (await event.toJSON()).id;
+            const validateTournament = await tournamentSchema.validateAsync(req.body, { stripUnknown: true });
+            const tournament = await createTournament(validateTournament);
+            if (!tournament) {
+                await deleteEvent(req.body.event_id);
+            }
         } else if (event && validatedEvent.event_type === 'league') {
-            req.body.event_id = event;
-            const validateLeague = await leagueSchema.validateAsync(req.body);
-            await createLeague(validateLeague);
+            req.body.event_id = (await event.toJSON()).id;
+            const validateLeague = await leagueSchema.validateAsync(req.body, { stripUnknown: true });
+            const league = await createLeague(validateLeague);
+            if (!league) {
+                await deleteEvent(req.body.event_id);
+            }
         }
 
         res.status(201).json({
@@ -28,6 +34,7 @@ export const createEventController = async (req, res, next) => {
             data: event,
         });
     } catch (error) {
+        console.log(error);
         next(error);
     }
 };
@@ -35,6 +42,8 @@ export const createEventController = async (req, res, next) => {
 export const getEventsController = async (req, res, next) => {
     try {
         const events = await getEvents();
+
+        console.log(events);
 
         const eventsWithData = await Promise.all(
             events.map(async (event) => {
@@ -56,17 +65,18 @@ export const getEventsController = async (req, res, next) => {
             data: eventsWithData,
         });
     } catch (error) {
+        console.log(error);
         next(error);
     }
 };
 
 export const getEventByIdController = async (req, res, next) => {
     try {
-        const { eventId } = req.params;
+        const { event_id } = req.params;
 
-        if (!eventId) generateError('El id del evento es requerido', 400);
+        if (!event_id) generateError('El id del evento es requerido', 400);
 
-        const event = await getEventById(eventId);
+        const event = await getEventById(event_id);
 
         let eventWithData;
         if (event.event_type === 'tournament') {
@@ -89,22 +99,43 @@ export const getEventByIdController = async (req, res, next) => {
     }
 };
 
+export const existsNameEvent = async (req, res, next) => {
+    try {
+        const { event } = req.body;
+
+        console.log(event);
+
+        const exists = await checkExistsNameEvent(event.name);
+
+        res.status(200).json({
+            status: 200,
+            data: exists,
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const updateEventController = async (req, res, next) => {
     try {
-        const { eventId } = req.params;
+        const { event_id } = req.params;
 
-        if (!eventId) generateError('El id del evento es requerido', 400);
+        if (!event_id) generateError('El id del evento es requerido', 400);
 
-        const validatedEvent = await updateEventSchema.validateAsync(req.body);
+        console.log(req.body);
 
-        const event = await updateEvent(eventId, validatedEvent);
+        const validatedEvent = await updateEventSchema.validateAsync(req.body, { stripUnknown: true });
+
+        const event = await updateEvent(event_id, validatedEvent);
 
         if (event.event_type === 'tournament') {
-            const validatedTournament = await updateTournamentSchema.validateAsync(req.body);
-            await updateTournament(eventId, validatedTournament);
+            req.body.tournament.event_id = req.body.id;
+            const validatedTournament = await updateTournamentSchema.validateAsync(req.body.tournament, { stripUnknown: true });
+            await updateTournament(event_id, validatedTournament);
         } else if (event.event_type === 'league') {
-            const validateLeague = await await updateLeagueSchema.validateAsync(req.body);
-            await updateLeague(eventId, validateLeague);
+            req.body.league.event_id = req.body.id;
+            const validateLeague = await await updateLeagueSchema.validateAsync(req.body.league, { stripUnknown: true });
+            await updateLeague(event_id, validateLeague);
         }
 
         res.status(200).json({
@@ -113,17 +144,18 @@ export const updateEventController = async (req, res, next) => {
             data: event,
         });
     } catch (error) {
+        console.log(error);
         next(error);
     }
 };
 
 export const deleteEventController = async (req, res, next) => {
     try {
-        const { eventId } = req.params;
+        const { event_id } = req.params;
 
-        if (!eventId) generateError('El id del evento es requerido', 400);
+        if (!event_id) generateError('El id del evento es requerido', 400);
 
-        const event = await deleteEvent(eventId);
+        const event = await deleteEvent(event_id);
 
         res.status(200).json({
             status: 200,

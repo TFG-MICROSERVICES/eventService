@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 export const tournamentSchema = Joi.object({
-    event_id: Joi.string().required().messages({
+    event_id: Joi.number().required().messages({
         'string.empty': 'El ID del evento no puede estar vacío',
         'any.required': 'El ID del evento es requerido',
     }),
@@ -36,7 +36,7 @@ export const tournamentSchema = Joi.object({
 });
 
 export const updateTournamentSchema = Joi.object({
-    event_id: Joi.string().messages({
+    event_id: Joi.number().required().messages({
         'string.empty': 'El ID del evento no puede estar vacío',
     }),
 

@@ -1,16 +1,9 @@
 import Joi from 'joi';
 
 export const leagueSchema = Joi.object({
-    event_id: Joi.string().required().messages({
+    event_id: Joi.number().required().messages({
         'string.empty': 'El ID del evento no puede estar vacío',
         'any.required': 'El ID del evento es requerido',
-    }),
-
-    number_of_teams: Joi.number().integer().min(2).required().messages({
-        'number.base': 'El número de equipos debe ser un número',
-        'number.integer': 'El número de equipos debe ser un número entero',
-        'number.min': 'El número de equipos debe ser al menos 2',
-        'any.required': 'El número de equipos es requerido',
     }),
 
     teams_max: Joi.number().integer().min(2).required().messages({
@@ -27,14 +20,8 @@ export const leagueSchema = Joi.object({
 });
 
 export const updateLeagueSchema = Joi.object({
-    event_id: Joi.string().messages({
+    event_id: Joi.number().messages({
         'string.empty': 'El ID del evento no puede estar vacío',
-    }),
-
-    number_of_teams: Joi.number().integer().min(2).messages({
-        'number.base': 'El número de equipos debe ser un número',
-        'number.integer': 'El número de equipos debe ser un número entero',
-        'number.min': 'El número de equipos debe ser al menos 2',
     }),
 
     teams_max: Joi.number().integer().min(2).messages({

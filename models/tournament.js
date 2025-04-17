@@ -1,16 +1,23 @@
 import { DataTypes } from 'sequelize';
+import database from '../db/database.js';
 
-export const Tournament = (sequelize) => {
-    const Tournament = sequelize.define('Tournament', {
+export const Tournament = database.define(
+    'Tournament',
+    {
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
         },
         event_id: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             unique: true,
             allowNull: false,
+            references: {
+                model: 'Events',
+                key: 'id',
+            },
+            onDelete: 'CASCADE',
         },
         elimination_type: {
             type: DataTypes.ENUM('single_elimination', 'double_elimination', 'group_stage'),
@@ -24,15 +31,8 @@ export const Tournament = (sequelize) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-    });
-
-    Tournament.associate = (models) => {
-        Tournament.belongsTo(models.Event, {
-            foreignKey: 'event_id',
-            targetKey: 'id',
-            onDelete: 'CASCADE',
-        });
-    };
-
-    return Tournament;
-};
+    },
+    {
+        tableName: 'Tournaments',
+    }
+);

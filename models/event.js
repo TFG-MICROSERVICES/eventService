@@ -13,7 +13,7 @@ export const Event = database.define(
             primaryKey: true,
         },
         sport_id: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: false,
         },
         name: {

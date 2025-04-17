@@ -1,7 +1,8 @@
 import { DataTypes } from 'sequelize';
+import database from '../db/database.js';
 
 export const Result = (sequelize) => {
-    const Result = sequelize.define(
+    const Result = database.define(
         'Result',
         {
             id: {
@@ -9,7 +10,7 @@ export const Result = (sequelize) => {
                 autoIncrement: true,
             },
             event_id: {
-                type: DataTypes.STRING,
+                type: DataTypes.INTEGER,
                 allowNull: false,
                 primaryKey: true,
             },

@@ -1,20 +1,22 @@
 import { DataTypes } from 'sequelize';
+import database from '../db/database.js';
 
-export const League = (sequelize) => {
-    const League = sequelize.define('League', {
+export const League = database.define(
+    'League',
+    {
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
         },
         event_id: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             unique: true,
             allowNull: false,
-        },
-        number_of_teams: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
+            references: {
+                model: 'Events',
+                key: 'id',
+            },
         },
         teams_max: {
             type: DataTypes.INTEGER,
@@ -25,15 +27,8 @@ export const League = (sequelize) => {
             allowNull: false,
             defaultValue: false,
         },
-    });
-
-    League.associate = (models) => {
-        League.belongsTo(models.Event, {
-            foreignKey: 'event_id',
-            targetKey: 'id',
-            onDelete: 'CASCADE',
-        });
-    };
-
-    return League;
-};
+    },
+    {
+        tableName: 'Leagues',
+    }
+);

@@ -50,7 +50,7 @@ export const updateTournament = async (event_id, data) => {
 
 export const deleteTournament = async (event_id) => {
     try {
-        const tournament = await Tournament.findOne({
+        const tournament = await Tournament.findAll({
             where: { event_id: event_id },
         });
 
