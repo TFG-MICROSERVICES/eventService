@@ -17,7 +17,7 @@ router.get('/', validateApiKey, getEventsController);
 router.get('/:event_id', validateApiKey, getEventByIdController);
 
 //POST http://localhost:3005/events
-router.post('/', validateApiKey, createEventController);
+router.post('/register', validateApiKey, createEventController);
 
 //POST http://localhost:3005/events/exists
 router.post('/exists', validateApiKey, existsNameEvent);

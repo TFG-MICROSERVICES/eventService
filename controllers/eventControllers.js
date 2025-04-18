@@ -129,12 +129,10 @@ export const updateEventController = async (req, res, next) => {
         const event = await updateEvent(event_id, validatedEvent);
 
         if (event.event_type === 'tournament') {
-            req.body.tournament.event_id = req.body.id;
-            const validatedTournament = await updateTournamentSchema.validateAsync(req.body.tournament, { stripUnknown: true });
+            const validatedTournament = await updateTournamentSchema.validateAsync(req.body, { stripUnknown: true });
             await updateTournament(event_id, validatedTournament);
         } else if (event.event_type === 'league') {
-            req.body.league.event_id = req.body.id;
-            const validateLeague = await await updateLeagueSchema.validateAsync(req.body.league, { stripUnknown: true });
+            const validateLeague = await await updateLeagueSchema.validateAsync(req.body, { stripUnknown: true });
             await updateLeague(event_id, validateLeague);
         }
 

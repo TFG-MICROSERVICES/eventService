@@ -13,7 +13,7 @@ EventEmitter.defaultMaxListeners = 30;
 app.use(express.json());
 app.use(morgan('combined'));
 
-app.use('/events', eventRoutes);
+app.use('/event', eventRoutes);
 
 app.use((req, res, next) => {
     res.status(404).json({
