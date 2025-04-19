@@ -52,9 +52,9 @@ export const createEventController = async (req, res, next) => {
 
 export const getEventsController = async (req, res, next) => {
     try {
-        const events = await getEvents();
+        const { sport_id } = req.query;
 
-        console.log(events);
+        const events = await getEvents(sport_id);
 
         const eventsWithData = await Promise.all(
             events.map(async (event) => {

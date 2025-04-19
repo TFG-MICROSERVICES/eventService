@@ -33,9 +33,17 @@ export const checkExistsNameEvent = async (name) => {
     }
 };
 
-export const getEvents = async () => {
+export const getEvents = async (sport_id) => {
     try {
-        const events = await Event.findAll();
+        let events;
+        console.log(sport_id);
+        if (sport_id) {
+            events = await Event.findAll({
+                where: { sport_id: sport_id },
+            });
+        } else {
+            events = await Event.findAll();
+        }
 
         const data = await Promise.all(
             events.map(async (currentEvent) => {
