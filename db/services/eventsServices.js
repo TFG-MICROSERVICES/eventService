@@ -22,8 +22,6 @@ export const checkExistsNameEvent = async (name) => {
             where: { name: name },
         });
 
-        console.log(event);
-
         if (event) {
             return true;
         } else {

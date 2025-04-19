@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import database from './db/database.js';
 import { EventEmitter } from 'events';
 import eventRoutes from './routes/eventRoutes.js';
+import teamEvent from './routes/teamEventRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(morgan('combined'));
 
 app.use('/event', eventRoutes);
+app.use('/team-event', teamEvent);
 
 app.use((req, res, next) => {
     res.status(404).json({

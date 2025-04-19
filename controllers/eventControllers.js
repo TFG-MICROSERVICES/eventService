@@ -1,6 +1,8 @@
 import { createEvent, getEvents, getEventById, updateEvent, deleteEvent, checkExistsNameEvent } from '../db/services/eventsServices.js';
 import { createLeague, getLeagueById, updateLeague } from '../db/services/leaguesServices.js';
+import { getTeamsEventByIdService } from '../db/services/teamEventServices.js';
 import { createTournament, getTournament, updateTournament } from '../db/services/tournamentServices.js';
+import { createUserEventService } from '../db/services/userEventServices.js';
 import { eventSchema, updateEventSchema } from '../schemas/eventSchema.js';
 import { leagueSchema, updateLeagueSchema } from '../schemas/leagueSchema.js';
 import { tournamentSchema, updateTournamentSchema } from '../schemas/tournamentSchema.js';
@@ -11,6 +13,15 @@ export const createEventController = async (req, res, next) => {
         const validatedEvent = await eventSchema.validateAsync(req.body, { stripUnknown: true });
 
         const event = await createEvent(validatedEvent);
+
+        //Creamos el objeto que asocia al usuario con el evento que ha creado
+        const data = {
+            event_id: event.id,
+            user_id: req.body.user_id,
+        };
+
+        //Creamos la asociacion entre evento y usuario
+        await createUserEventService(data);
 
         if (event && validatedEvent.event_type === 'tournament') {
             req.body.event_id = (await event.toJSON()).id;
@@ -47,14 +58,15 @@ export const getEventsController = async (req, res, next) => {
 
         const eventsWithData = await Promise.all(
             events.map(async (event) => {
+                const teams = await getTeamsEventByIdService(event.id);
                 if (event.event_type === 'tournament') {
                     const tournament = await getTournament(event.id);
-                    return { ...event, tournament: tournament };
+                    return { ...event, tournament: tournament, teams: teams };
                 } else if (event.event_type === 'league') {
                     const league = await getLeagueById(event.id);
-                    return { ...event, league };
+                    return { ...event, league: league, teams: teams };
                 } else {
-                    return event;
+                    return { ...event, teams: teams };
                 }
             })
         );

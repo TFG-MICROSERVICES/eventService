@@ -12,6 +12,7 @@ module.exports = {
                 },
                 team_id: {
                     type: Sequelize.INTEGER,
+                    allowNull: false,
                 },
                 event_id: {
                     type: Sequelize.INTEGER,

@@ -1,7 +1,7 @@
 import { DataTypes } from 'sequelize';
 import database from '../db/database.js';
 
-export const TeamEvent = database.define(
+export const UserEvent = database.define(
     'UserEvent',
     {
         id: {
@@ -9,7 +9,7 @@ export const TeamEvent = database.define(
             autoIncrement: true,
             primaryKey: true,
         },
-        team_id: {
+        user_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
@@ -23,6 +23,6 @@ export const TeamEvent = database.define(
         },
     },
     {
-        tableName: 'TeamsEvents',
+        tableName: 'UsersEvents',
     }
 );
