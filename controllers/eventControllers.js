@@ -2,7 +2,7 @@ import { createEvent, getEvents, getEventById, updateEvent, deleteEvent, checkEx
 import { createLeague, getLeagueById, updateLeague } from '../db/services/leaguesServices.js';
 import { getTeamsEventByIdService } from '../db/services/teamEventServices.js';
 import { createTournament, getTournament, updateTournament } from '../db/services/tournamentServices.js';
-import { createUserEventService } from '../db/services/userEventServices.js';
+import { createUserEventService, getUserEventByIdService } from '../db/services/userEventServices.js';
 import { eventSchema, updateEventSchema } from '../schemas/eventSchema.js';
 import { leagueSchema, updateLeagueSchema } from '../schemas/leagueSchema.js';
 import { tournamentSchema, updateTournamentSchema } from '../schemas/tournamentSchema.js';
@@ -59,14 +59,15 @@ export const getEventsController = async (req, res, next) => {
         const eventsWithData = await Promise.all(
             events.map(async (event) => {
                 const teams = await getTeamsEventByIdService(event.id);
+                const owner = await getUserEventByIdService(event.id);
                 if (event.event_type === 'tournament') {
                     const tournament = await getTournament(event.id);
-                    return { ...event, tournament: tournament, teams: teams };
+                    return { ...event, tournament: tournament, teams: teams, owner: owner };
                 } else if (event.event_type === 'league') {
                     const league = await getLeagueById(event.id);
-                    return { ...event, league: league, teams: teams };
+                    return { ...event, league: league, teams: teams, owner: owner };
                 } else {
-                    return { ...event, teams: teams };
+                    return { ...event, teams: teams, owner: owner };
                 }
             })
         );
@@ -91,14 +92,16 @@ export const getEventByIdController = async (req, res, next) => {
         const event = await getEventById(event_id);
 
         let eventWithData;
+        const teams = await getTeamsEventByIdService(event.id);
+        const owner = await getUserEventByIdService(event.id);
         if (event.event_type === 'tournament') {
             const tournament = await getTournament(event.id);
-            eventWithData = { ...event, tournament: tournament };
+            eventWithData = { ...event, tournament: tournament, teams: teams, owner: owner };
         } else if (event.event_type === 'league') {
             const league = await getLeagueById(event.id);
-            eventWithData = { ...event, league };
+            eventWithData = { ...event, league: league, teams: teams, owner: owner };
         } else {
-            eventWithData = event;
+            eventWithData = { ...event, teams: teams, owner: owner };
         }
 
         res.status(200).json({

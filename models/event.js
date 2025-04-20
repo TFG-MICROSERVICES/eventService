@@ -58,13 +58,3 @@ export const Event = database.define(
         tableName: 'Events',
     }
 );
-
-// // Definir las relaciones
-// Event.hasOne(Tournament, { foreignKey: 'event_id', sourceKey: 'event_id' });
-// Tournament.belongsTo(Event, { foreignKey: 'event_id', targetKey: 'event_id' });
-
-// Event.hasOne(League, { foreignKey: 'event_id', sourceKey: 'event_id' });
-// League.belongsTo(Event, { foreignKey: 'event_id', targetKey: 'event_id' });
-
-// Event.hasMany(Result, { foreignKey: 'event_id', sourceKey: 'event_id' });
-// Result.belongsTo(Event, { foreignKey: 'event_id', targetKey: 'event_id' });

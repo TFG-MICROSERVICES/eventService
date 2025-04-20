@@ -5,6 +5,8 @@ export const createTeamEventController = async (req, res, next) => {
     try {
         const { data } = req.body;
 
+        console.log(data);
+
         const validate = await schemaTeamEvent.validateAsync(data, { stripUnknown: true });
 
         await createTeamEventService(validate);
@@ -14,6 +16,7 @@ export const createTeamEventController = async (req, res, next) => {
             message: 'Equipo inscrito correctamente',
         });
     } catch (error) {
+        console.log(error);
         next(error);
     }
 };

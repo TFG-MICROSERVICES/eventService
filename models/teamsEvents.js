@@ -7,11 +7,11 @@ export const TeamEvent = database.define(
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
-            primaryKey: true,
         },
         team_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            primaryKey: true,
         },
         event_id: {
             type: DataTypes.INTEGER,
@@ -20,6 +20,7 @@ export const TeamEvent = database.define(
                 key: 'id',
             },
             onDelete: 'CASCADE',
+            primaryKey: true,
         },
     },
     {
