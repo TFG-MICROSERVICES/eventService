@@ -1,5 +1,6 @@
 import { createEvent, getEvents, getEventById, updateEvent, deleteEvent, checkExistsNameEvent } from '../db/services/eventsServices.js';
 import { createLeague, getLeagueById, updateLeague } from '../db/services/leaguesServices.js';
+import { getResultsByEventIdService } from '../db/services/resultServices.js';
 import { getTeamsEventByIdService } from '../db/services/teamEventServices.js';
 import { createTournament, getTournament, updateTournament } from '../db/services/tournamentServices.js';
 import { createUserEventService, getUserEventByIdService } from '../db/services/userEventServices.js';
@@ -67,7 +68,13 @@ export const getEventsController = async (req, res, next) => {
                     const league = await getLeagueById(event.id);
                     return { ...event, league: league, teams: teams, owner: owner };
                 } else {
-                    return { ...event, teams: teams, owner: owner };
+                    const results = await getResultsByEventIdService(event.id);
+
+                    if(results){
+                        return { ...event, teams: teams, owner: owner, results: results };
+                    }else{
+                        return { ...event, teams: teams, owner: owner };
+                    }
                 }
             })
         );
@@ -101,7 +108,13 @@ export const getEventByIdController = async (req, res, next) => {
             const league = await getLeagueById(event.id);
             eventWithData = { ...event, league: league, teams: teams, owner: owner };
         } else {
-            eventWithData = { ...event, teams: teams, owner: owner };
+            const results = await getResultsByEventIdService(event.id);
+
+            if(results){
+                eventWithData = { ...event, teams: teams, owner: owner, results: results };
+            }else{
+                eventWithData = { ...event, teams: teams, owner: owner };
+            }
         }
 
         res.status(200).json({
