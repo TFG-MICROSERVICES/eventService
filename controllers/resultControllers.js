@@ -21,32 +21,61 @@ export const createResultLeagueController = async (req, res, next) => {
         }
 
         let matchs = [];
-
         if (league.round_robin && teams.length > 2) {
-            for (let i = 0; i < teams.length; i++) {
-                for (let j = i + 1; j < teams.length; j++) {
-                    matchs.push({
-                        home_team_id: teams[i].team_id,
-                        away_team_id: teams[j].team_id,
-                        event_id: event_id,
-                        round: 1
-                    });
+            // Algoritmo para repartir partidos en jornadas (round robin solo ida)
+            let teamIds = teams.map(t => t.team_id);
+            const numTeams = teamIds.length;
+            let numRounds = numTeams - 1;
+
+            // Si impar, añadimos un "bye"
+            if (numTeams % 2 !== 0) {
+                teamIds.push(null);
+                numRounds = teamIds.length - 1;
+            }
+
+            const totalTeams = teamIds.length;
+
+            for (let round = 0; round < numRounds; round++) {
+                for (let i = 0; i < totalTeams / 2; i++) {
+                    const home = teamIds[i];
+                    const away = teamIds[totalTeams - 1 - i];
+                    if (home !== null && away !== null) {
+                        matchs.push({
+                            home_team_id: home,
+                            away_team_id: away,
+                            event_id: event_id,
+                            score_home: 0,
+                            score_away: 0,
+                            round: round + 1
+                        });
+                    }
                 }
+                // Rotar los equipos (excepto el primero)
+                teamIds.splice(1, 0, teamIds.pop());
             }
         } else {
+            // Enfrentamientos aleatorios, cada partido en una jornada distinta
             let shuffled = teams.slice().sort(() => Math.random() - 0.5);
+            let round = 1;
             for (let i = 0; i < shuffled.length - 1; i += 2) {
                 matchs.push({
                     home_team_id: shuffled[i].team_id,
                     away_team_id: shuffled[i + 1].team_id,
                     event_id: event_id,
+                    score_home: 0,
+                    score_away: 0,
+                    round: round++
                 });
             }
+            // Si hay un equipo impar, el último queda sin rival en la última jornada
             if (shuffled.length % 2 !== 0) {
                 matchs.push({
                     home_team_id: shuffled[shuffled.length - 1].team_id,
                     away_team_id: null,
                     event_id: event_id,
+                    score_home: 0,
+                    score_away: 0,
+                    round: round
                 });
             }
         }
