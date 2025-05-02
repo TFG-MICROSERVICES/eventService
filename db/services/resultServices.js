@@ -28,7 +28,7 @@ export const getResultsByEventIdService = async (event_id) => {
 
         const data = await Promise.all(
             results.map(async (currentResult) => {
-                const result = await currentEvent.toJSON();
+                const result = await currentResult.toJSON();
                 return result;
             })
         );

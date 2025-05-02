@@ -61,21 +61,16 @@ export const getEventsController = async (req, res, next) => {
             events.map(async (event) => {
                 const teams = await getTeamsEventByIdService(event.id);
                 const owner = await getUserEventByIdService(event.id);
+                const base = { ...event, teams, owner };
                 if (event.event_type === 'tournament') {
-                    const tournament = await getTournament(event.id);
-                    return { ...event, tournament: tournament, teams: teams, owner: owner };
+                    base.tournament = await getTournament(event.id);
                 } else if (event.event_type === 'league') {
-                    const league = await getLeagueById(event.id);
-                    return { ...event, league: league, teams: teams, owner: owner };
-                } else {
-                    const results = await getResultsByEventIdService(event.id);
-
-                    if(results){
-                        return { ...event, teams: teams, owner: owner, results: results };
-                    }else{
-                        return { ...event, teams: teams, owner: owner };
-                    }
+                    base.league = await getLeagueById(event.id);
                 }
+                const results = await getResultsByEventIdService(event.id);
+                console.log(results);
+                if (results) base.results = results;
+                return base;
             })
         );
 
@@ -98,23 +93,24 @@ export const getEventByIdController = async (req, res, next) => {
 
         const event = await getEventById(event_id);
 
-        let eventWithData;
         const teams = await getTeamsEventByIdService(event.id);
         const owner = await getUserEventByIdService(event.id);
+        const results = await getResultsByEventIdService(event.id);
+
+        let eventWithData = { ...event, teams, owner };
+
         if (event.event_type === 'tournament') {
             const tournament = await getTournament(event.id);
-            eventWithData = { ...event, tournament: tournament, teams: teams, owner: owner };
+            eventWithData.tournament = tournament;
         } else if (event.event_type === 'league') {
             const league = await getLeagueById(event.id);
-            eventWithData = { ...event, league: league, teams: teams, owner: owner };
-        } else {
-            const results = await getResultsByEventIdService(event.id);
+            eventWithData.league = league;
+        }
 
-            if(results){
-                eventWithData = { ...event, teams: teams, owner: owner, results: results };
-            }else{
-                eventWithData = { ...event, teams: teams, owner: owner };
-            }
+        if (results && results.length > 0) {
+            eventWithData.results = results;
+        }else{
+            eventWithData.results = [];
         }
 
         res.status(200).json({
@@ -123,6 +119,7 @@ export const getEventByIdController = async (req, res, next) => {
             data: eventWithData,
         });
     } catch (error) {
+        console.log(error);
         next(error);
     }
 };

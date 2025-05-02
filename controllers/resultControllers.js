@@ -14,20 +14,35 @@ export const createResultLeagueController = async (req, res, next) => {
         const teams = await getTeamsEventByIdService(event_id);
 
         if (!teams || teams.length < 2) {
-            return res.status(400).json({
-                status: 400,
-                message: 'No hay suficientes equipos para crear enfrentamientos',
-            });
+            generateError('No hay suficientes equipos para crear enfrentamientos', 400);
         }
 
         let matchs = [];
-        if (league.round_robin && teams.length > 2) {
+        if (teams.length === 2) {
+            // Caso especial: ida y vuelta para dos equipos
+            matchs.push({
+                home_team_id: teams[0].team_id,
+                away_team_id: teams[1].team_id,
+                event_id: event_id,
+                score_home: 0,
+                score_away: 0,
+                round: 1
+            });
+            matchs.push({
+                home_team_id: teams[1].team_id,
+                away_team_id: teams[0].team_id,
+                event_id: event_id,
+                score_home: 0,
+                score_away: 0,
+                round: 2
+            });
+        } else if (league.round_robin && teams.length > 2) {
             // Algoritmo para repartir partidos en jornadas (round robin solo ida)
             let teamIds = teams.map(t => t.team_id);
+            console.log(teamIds);
             const numTeams = teamIds.length;
             let numRounds = numTeams - 1;
 
-            // Si impar, añadimos un "bye"
             if (numTeams % 2 !== 0) {
                 teamIds.push(null);
                 numRounds = teamIds.length - 1;
