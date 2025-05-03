@@ -47,10 +47,26 @@ export const updateResultService = async (result_id, data) => {
             generateError('Error al actualizar el resultado', 500);
         }
 
-       await result.update(data);
+        await result.update(data);
 
         return true;
     }catch(error){
         throw error;
     }
 }
+
+export const deleteResultByEventService = async (event_id) => {
+    try {
+        const deletedCount = await Result.destroy({
+            where: { event_id: event_id }
+        });
+
+        if (deletedCount === 0) {
+            generateError('No se encontraron resultados para eliminar', 404);
+        }
+
+        return true;
+    } catch (error) {
+        throw error;
+    }
+};

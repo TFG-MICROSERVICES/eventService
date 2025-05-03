@@ -85,11 +85,4 @@ export const updateResultSchema = Joi.object({
         'date.base': 'La fecha debe ser una fecha válida',
         'date.format': 'La fecha debe tener formato ISO',
     }),
-}).custom((value, helpers) => {
-    if (value.home_team_id === value.away_team_id) {
-        return helpers.error('custom.sameTeam', {
-            message: 'El equipo local y visitante no pueden ser el mismo',
-        });
-    }
-    return value;
 });

@@ -68,7 +68,6 @@ export const getEventsController = async (req, res, next) => {
                     base.league = await getLeagueById(event.id);
                 }
                 const results = await getResultsByEventIdService(event.id);
-                console.log(results);
                 if (results) base.results = results;
                 return base;
             })

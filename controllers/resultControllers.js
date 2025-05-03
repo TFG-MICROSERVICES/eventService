@@ -1,8 +1,18 @@
 import { getLeagueById } from "../db/services/leaguesServices.js";
 import { getTeamsEventByIdService } from "../db/services/teamEventServices.js";
 import { generateError } from "../utils/generateError.js";
-import { createResultsService, updateResultService } from '../db/services/resultServices.js';
+import { createResultsService, deleteResultByEventService, getResultsByEventIdService, updateResultService } from '../db/services/resultServices.js';
 import { updateResultSchema } from "../schemas/resultSchema.js";
+
+//Función auxiliar para mezaclar los equipos y que se generen en enfrentamientos distintos
+function shuffleArray(array) {
+    let arr = array.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
 
 export const createResultLeagueController = async (req, res, next) => {
     try {
@@ -14,7 +24,21 @@ export const createResultLeagueController = async (req, res, next) => {
         const teams = await getTeamsEventByIdService(event_id);
 
         if (!teams || teams.length < 2) {
-            generateError('No hay suficientes equipos para crear enfrentamientos', 400);
+            return generateError('No hay suficientes equipos para crear enfrentamientos', 400);
+        }
+
+        // Nueva comprobación: equipos impares
+        if (teams.length % 2 !== 0) {
+            return res.status(400).json({
+                status: 400,
+                message: 'No se pueden crear enfrentamientos con un número impar de equipos. Añade o elimina un equipo para continuar.',
+            });
+        }
+
+        const existsResults = await getResultsByEventIdService(event_id);
+
+        if(existsResults.length > 0){
+            await deleteResultByEventService(event_id);
         }
 
         let matchs = [];
@@ -39,14 +63,8 @@ export const createResultLeagueController = async (req, res, next) => {
         } else if (league.round_robin && teams.length > 2) {
             // Algoritmo para repartir partidos en jornadas (round robin solo ida)
             let teamIds = teams.map(t => t.team_id);
-            console.log(teamIds);
             const numTeams = teamIds.length;
             let numRounds = numTeams - 1;
-
-            if (numTeams % 2 !== 0) {
-                teamIds.push(null);
-                numRounds = teamIds.length - 1;
-            }
 
             const totalTeams = teamIds.length;
 
@@ -70,7 +88,7 @@ export const createResultLeagueController = async (req, res, next) => {
             }
         } else {
             // Enfrentamientos aleatorios, cada partido en una jornada distinta
-            let shuffled = teams.slice().sort(() => Math.random() - 0.5);
+            let shuffled = shuffleArray(teams);
             let round = 1;
             for (let i = 0; i < shuffled.length - 1; i += 2) {
                 matchs.push({
@@ -80,17 +98,6 @@ export const createResultLeagueController = async (req, res, next) => {
                     score_home: 0,
                     score_away: 0,
                     round: round++
-                });
-            }
-            // Si hay un equipo impar, el último queda sin rival en la última jornada
-            if (shuffled.length % 2 !== 0) {
-                matchs.push({
-                    home_team_id: shuffled[shuffled.length - 1].team_id,
-                    away_team_id: null,
-                    event_id: event_id,
-                    score_home: 0,
-                    score_away: 0,
-                    round: round
                 });
             }
         }
@@ -121,6 +128,7 @@ export const updateResultController = async (req, res, next) => {
             message: 'Resultado actualizado correctamente'
         });
     }catch(error){
+        console.log(error);
         next(error);
     }
 }
