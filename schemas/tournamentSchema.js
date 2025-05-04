@@ -7,28 +7,9 @@ export const tournamentSchema = Joi.object({
     }),
     elimination_type: Joi.string().valid('single_elimination', 'double_elimination').required().messages({
         'string.empty': 'El tipo de eliminación no puede estar vacío',
-        'any.only': 'El tipo de eliminación debe ser single_elimination, double_elimination o group_stage',
+        'any.only': 'El tipo de eliminación debe ser un partido o dos paridos',
         'any.required': 'El tipo de eliminación es requerido',
     }),
-    group_stage: Joi.boolean().required().messages({
-        'boolean.empty': 'El tipo de torneo con o sin fase de grupos es obligatorio',
-        'boolean.empty': 'El tipo de eliminatioria inicial debe ser un booleano'
-    }),
-    team_for_group: Joi.number()
-        .integer()
-        .min(2)
-        .allow(null)
-        .when('elimination_type', {
-            is: 'group_stage',
-            then: Joi.required(),
-        })
-        .messages({
-            'number.base': 'El número de equipos por grupo debe ser un número',
-            'number.integer': 'El número de equipos por grupo debe ser un número entero',
-            'number.min': 'El número de equipos por grupo debe ser al menos 2',
-            'any.required': 'El número de equipos por grupo es requerido cuando el tipo es group_stage',
-        }),
-
     number_of_teams: Joi.number().integer().min(2).required().messages({
         'number.base': 'El número de equipos debe ser un número',
         'number.integer': 'El número de equipos debe ser un número entero',
@@ -41,27 +22,10 @@ export const updateTournamentSchema = Joi.object({
     event_id: Joi.number().required().messages({
         'string.empty': 'El ID del evento no puede estar vacío',
     }),
-
-    elimination_type: Joi.string().valid('single_elimination', 'double_elimination', 'group_stage').messages({
+    elimination_type: Joi.string().valid('single_elimination', 'double_elimination').messages({
         'string.empty': 'El tipo de eliminación no puede estar vacío',
-        'any.only': 'El tipo de eliminación debe ser single_elimination, double_elimination o group_stage',
+        'any.only': 'El tipo de eliminación debe ser de un paridos o dos partidos',
     }),
-
-    team_for_group: Joi.number()
-        .integer()
-        .min(2)
-        .allow(null)
-        .when('elimination_type', {
-            is: 'group_stage',
-            then: Joi.required(),
-        })
-        .messages({
-            'number.base': 'El número de equipos por grupo debe ser un número',
-            'number.integer': 'El número de equipos por grupo debe ser un número entero',
-            'number.min': 'El número de equipos por grupo debe ser al menos 2',
-            'any.required': 'El número de equipos por grupo es requerido cuando el tipo es group_stage',
-        }),
-
     number_of_teams: Joi.number().integer().min(2).messages({
         'number.base': 'El número de equipos debe ser un número',
         'number.integer': 'El número de equipos debe ser un número entero',

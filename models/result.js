@@ -12,6 +12,11 @@ export const Result = database.define(
         event_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
+            references: {
+                model: 'Events',
+                key: 'id',
+            },
+            onDelete: 'CASCADE',
         },
         home_team_id: {
             type: DataTypes.INTEGER,

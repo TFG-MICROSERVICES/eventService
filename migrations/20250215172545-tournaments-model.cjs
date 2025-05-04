@@ -23,20 +23,6 @@ module.exports = {
                 type: Sequelize.ENUM('single_elimination', 'double_elimination'),
                 allowNull: false,
             },
-            group_stage: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false,
-                defaultValue: false,
-            },
-            generate_groups: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false,
-                defaultValue: false,
-            },
-            team_for_group: {
-                type: Sequelize.INTEGER,
-                allowNull: true,
-            },
             number_of_teams: {
                 type: Sequelize.INTEGER,
                 allowNull: false,

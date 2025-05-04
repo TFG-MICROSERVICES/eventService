@@ -17,6 +17,7 @@ export const League = database.define(
                 model: 'Events',
                 key: 'id',
             },
+            onDelete: 'CASCADE',
         },
         teams_max: {
             type: DataTypes.INTEGER,

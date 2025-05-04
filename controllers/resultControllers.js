@@ -7,42 +7,8 @@ import { shuffleArray } from "../utils/suffleArray.js";
 import { getTournament, updateTournament } from "../db/services/tournamentServices.js";
 import { getEventById } from "../db/services/eventsServices.js";
 
-// Reparte equipos aleatoriamente en grupos
-function assignTeamsToGroups(teams, numGroups) {
-    const shuffled = shuffleArray(teams);
-    const groups = Array.from({ length: numGroups }, (_, i) => ({
-        group_id: i + 1,
-        teams: []
-    }));
-
-    shuffled.forEach((team, idx) => {
-        groups[idx % numGroups].teams.push(team);
-    });
-
-    return groups;
-}
-
-// Genera los partidos de cada grupo (solo un partido por pareja)
-function generateGroupMatches(groups, event_id) {
-    let matchs = [];
-    for (const group of groups) {
-        const teams = group.teams;
-        let round = 1;
-        for (let i = 0; i < teams.length; i++) {
-            for (let j = i + 1; j < teams.length; j++) {
-                matchs.push({
-                    home_team_id: teams[i].team_id,
-                    away_team_id: teams[j].team_id,
-                    event_id: event_id,
-                    group_id: group.group_id,
-                    score_home: 0,
-                    score_away: 0,
-                    round: round++
-                });
-            }
-        }
-    }
-    return matchs;
+function isPowerOfTwo(n) {
+    return n > 1 && (n & (n - 1)) === 0;
 }
 
 export const createResultLeagueController = async (req, res, next) => {
@@ -51,126 +17,124 @@ export const createResultLeagueController = async (req, res, next) => {
 
         if (!event_id) generateError('El id del evento es requerido', 400);
 
-        // Obtener el evento para saber si es liga o torneo
         const event = await getEventById(event_id);
 
         // --- LÓGICA PARA TORNEOS ---
         if (event.event_type === 'tournament') {
-            const teams = await getTeamsEventByIdService(event_id);
+            let teams = await getTeamsEventByIdService(event_id);
             const tournament = await getTournament(event_id);
-            const type_of_elimination = tournament.type_of_elimination;
+            const type_of_elimination = tournament.elimination_type;
 
             if (!teams || teams.length < 2) {
                 return generateError('No hay suficientes equipos para crear enfrentamientos', 400);
             }
 
+            if (!isPowerOfTwo(teams.length)) {
+                generateError('Faltan equipos para generar los enfrentamientos.', 400);
+            }
+
             // Eliminar resultados previos si existen
             const existsResults = await getResultsByEventIdService(event_id);
-            if (existsResults.length > 0) {
-                await deleteResultByEventService(event_id);
-            }
 
-            // --- TORNEO POR GRUPOS ---
-            if (!tournament.generate_groups) {
-                const num_groups = tournament.number_of_teams / tournament.team_for_group;
-
-                if (!num_groups || num_groups < 1) {
-                    return generateError('Debes indicar el número de grupos', 400);
-                }
-                if (teams.length % num_groups !== 0) {
-                    return res.status(400).json({
-                        status: 400,
-                        message: 'El número de equipos debe ser divisible entre el número de grupos.',
-                    });
-                }
-
-                // 1. Repartir equipos aleatoriamente en grupos
-                const groups = assignTeamsToGroups(teams, num_groups);
-
-                // 2. Generar los partidos de cada grupo
-                const matchs = generateGroupMatches(groups, event_id);
-
-                // 3. Guardar los partidos
-                const results = await createResultsService(matchs);
-
-                await updateTournament(event_id,{ generate_groups: true });
-
-                return res.status(201).json({
-                    status: 201,
-                    message: 'Enfrentamientos de grupos creados correctamente',
-                    data: results,
+            //Comprobamos si quedan partidos por disputarse antes de hacer el sorteo de la siguiente ronda
+            if(existsResults.length > 0){
+                const matchNoPlayed = existsResults.find((result) => {
+                    if(!result.playedAt){
+                        return result;
+                    }
                 });
-            }
+    
+                if(matchNoPlayed){
+                    generateError('Aún quedan partidos por disputarse', 400);
+                }else{
+                    //Obtenemos los equipos ganadores para ambos tipos de clasificaciones
+                    if(type_of_elimination === 'single_elimination'){
+                        const winnerTeamIds = existsResults.map(result =>
+                            result.score_home > result.score_away ? result.home_team_id : result.away_team_id
+                        );
+                        teams = teams.filter(team => winnerTeamIds.includes(team.team_id));
+                    } else if (type_of_elimination === 'double_elimination') {
+                        const matchMap = new Map();
 
-            // --- TORNEO ELIMINACIÓN DIRECTA ---
-            if (tournament.generate_groups) {
-                if (!type_of_elimination) {
-                    return generateError('Debes indicar el tipo de eliminación', 400);
-                }
-                if (teams.length % 2 !== 0) {
-                    return res.status(400).json({
-                        status: 400,
-                        message: 'No se pueden crear enfrentamientos de eliminación con un número impar de equipos.',
-                    });
-                }
+                        existsResults.forEach(result => {
+                            // Crear una clave única para cada enfrentamiento, sin importar el orden de los equipos
+                            const key = [result.home_team_id, result.away_team_id].sort().join('-');
+                            if (!matchMap.has(key)) {
+                                matchMap.set(key, []);
+                            }
+                            matchMap.get(key).push(result);
+                        });
 
-                let shuffled = shuffleArray(teams);
-                let numTeams = shuffled.length;
-                let round = 1;
-                let phase = 1;
-                let matchs = [];
-
-                while (numTeams > 1) {
-                    for (let i = 0; i < numTeams; i += 2) {
-                        if (i + 1 < numTeams) {
-                            // Partido de ida
-                            matchs.push({
-                                home_team_id: shuffled[i].team_id,
-                                away_team_id: shuffled[i + 1].team_id,
-                                event_id: event_id,
-                                score_home: 0,
-                                score_away: 0,
-                                round: round,
-                                phase: phase
-                            });
-                            // Partido de vuelta si es doble eliminación
-                            if (type_of_elimination === 'double_elimination') {
-                                matchs.push({
-                                    home_team_id: shuffled[i + 1].team_id,
-                                    away_team_id: shuffled[i].team_id,
-                                    event_id: event_id,
-                                    score_home: 0,
-                                    score_away: 0,
-                                    round: round + 1,
-                                    phase: phase
-                                });
+                        // Determinar los ganadores globales
+                        const winnerTeamIds = [];
+                        for (const [key, matches] of matchMap.entries()) {
+                            if (matches.length === 2) {
+                                // Sumar los goles de ambos partidos
+                                const totalHome = matches[0].score_home + matches[1].score_away;
+                                const totalAway = matches[0].score_away + matches[1].score_home;
+                                if (totalHome > totalAway) {
+                                    winnerTeamIds.push(matches[0].home_team_id);
+                                } else {
+                                    winnerTeamIds.push(matches[0].away_team_id);
+                                }
                             }
                         }
-                        // Si impar, el último pasa de ronda automáticamente (bye)
-                    }
-                    // Para la siguiente fase, reduce equipos a la mitad
-                    numTeams = Math.floor(numTeams / 2);
-                    round += (type_of_elimination === 'double_elimination') ? 2 : 1;
-                    phase++;
-                }
 
-                const results = await createResultsService(matchs);
-                return res.status(201).json({
-                    status: 201,
-                    message: 'Enfrentamientos de eliminación creados correctamente',
-                    data: results,
-                });
+                        teams = teams.filter(team => winnerTeamIds.includes(team.team_id));
+                    }
+                }
             }
 
-            // Si no es ni group ni elimination, error
-            return res.status(400).json({
-                status: 400,
-                message: 'Tipo de torneo no soportado. Usa "group" o "elimination".',
+            if (!type_of_elimination) {
+                generateError('Debes indicar el tipo de eliminación', 400);
+            }
+
+            if (teams.length % 2 !== 0) {
+                generateError('No se pueden crear enfrentamientos de eliminación con un número impar de equipos.', 400);
+            }
+
+            let shuffled = shuffleArray(teams);
+            let numTeams = shuffled.length;
+            let round = numTeams / 2; // Ej: 4 equipos => ronda 2 (semifinales), 2 equipos => ronda 1 (final)
+            let phase = 1;
+            let matchs = [];
+
+            for (let i = 0; i < numTeams; i += 2) {
+                if (i + 1 < numTeams) {
+                    // Partido de ida
+                    matchs.push({
+                        home_team_id: shuffled[i].team_id,
+                        away_team_id: shuffled[i + 1].team_id,
+                        event_id: event_id,
+                        score_home: 0,
+                        score_away: 0,
+                        round: round,
+                        phase: phase
+                    });
+                    // Partido de vuelta si es doble eliminación
+                    if (type_of_elimination === 'double_elimination' && teams.length > 2) {
+                        matchs.push({
+                            home_team_id: shuffled[i + 1].team_id,
+                            away_team_id: shuffled[i].team_id,
+                            event_id: event_id,
+                            score_home: 0,
+                            score_away: 0,
+                            round: round,
+                            phase: phase
+                        });
+                    }
+                }
+            }
+            const results = await createResultsService(matchs);
+            return res.status(201).json({
+                status: 201,
+                message: 'Enfrentamientos de eliminación creados correctamente',
+                data: results,
             });
         }
 
         // --- LÓGICA PARA LIGAS ---
-        // Si no es torneo, se asume que es liga y se mantiene la lógica original
+        // Si no es torneo sse aplica la lógica de generar enfrentamientos para una liga
         const league = await getLeagueById(event_id);
         const teams = await getTeamsEventByIdService(event_id);
 
@@ -178,12 +142,13 @@ export const createResultLeagueController = async (req, res, next) => {
             return generateError('No hay suficientes equipos para crear enfrentamientos', 400);
         }
 
+        if (!isPowerOfTwo(teams.length)) {
+            return generateError('El número de equipos debe ser potencia de 2 para un torneo de eliminación.', 400);
+        }
+
         // Nueva comprobación: equipos impares
         if (teams.length % 2 !== 0) {
-            return res.status(400).json({
-                status: 400,
-                message: 'No se pueden crear enfrentamientos con un número impar de equipos. Añade o elimina un equipo para continuar.',
-            });
+            generateError('No se pueden crear enfrentamientos con un número impar de equipos', 400);
         }
 
         const existsResults = await getResultsByEventIdService(event_id);

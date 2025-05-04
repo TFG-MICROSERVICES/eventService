@@ -23,20 +23,6 @@ export const Tournament = database.define(
             type: DataTypes.ENUM('single_elimination', 'double_elimination'),
             allowNull: false,
         },
-        group_stage: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
-        generate_groups: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false,
-            defaultValue: false
-        },
-        team_for_group: {
-            type: DataTypes.INTEGER,
-            allowNull: true,
-        },
         number_of_teams: {
             type: DataTypes.INTEGER,
             allowNull: false,
