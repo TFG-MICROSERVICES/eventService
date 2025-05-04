@@ -26,6 +26,7 @@ export const createEventController = async (req, res, next) => {
 
         if (event && validatedEvent.event_type === 'tournament') {
             req.body.event_id = (await event.toJSON()).id;
+            console.log(req.body);
             const validateTournament = await tournamentSchema.validateAsync(req.body, { stripUnknown: true });
             const tournament = await createTournament(validateTournament);
             if (!tournament) {

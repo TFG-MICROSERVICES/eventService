@@ -20,8 +20,18 @@ module.exports = {
                 onDelete: 'CASCADE',
             },
             elimination_type: {
-                type: Sequelize.ENUM('single_elimination', 'double_elimination', 'group_stage'),
+                type: Sequelize.ENUM('single_elimination', 'double_elimination'),
                 allowNull: false,
+            },
+            group_stage: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
+            },
+            generate_groups: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
             },
             team_for_group: {
                 type: Sequelize.INTEGER,

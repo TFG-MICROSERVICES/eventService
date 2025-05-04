@@ -5,13 +5,15 @@ export const tournamentSchema = Joi.object({
         'string.empty': 'El ID del evento no puede estar vacío',
         'any.required': 'El ID del evento es requerido',
     }),
-
-    elimination_type: Joi.string().valid('single_elimination', 'double_elimination', 'group_stage').required().messages({
+    elimination_type: Joi.string().valid('single_elimination', 'double_elimination').required().messages({
         'string.empty': 'El tipo de eliminación no puede estar vacío',
         'any.only': 'El tipo de eliminación debe ser single_elimination, double_elimination o group_stage',
         'any.required': 'El tipo de eliminación es requerido',
     }),
-
+    group_stage: Joi.boolean().required().messages({
+        'boolean.empty': 'El tipo de torneo con o sin fase de grupos es obligatorio',
+        'boolean.empty': 'El tipo de eliminatioria inicial debe ser un booleano'
+    }),
     team_for_group: Joi.number()
         .integer()
         .min(2)

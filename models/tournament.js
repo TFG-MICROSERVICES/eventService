@@ -20,8 +20,18 @@ export const Tournament = database.define(
             onDelete: 'CASCADE',
         },
         elimination_type: {
-            type: DataTypes.ENUM('single_elimination', 'double_elimination', 'group_stage'),
+            type: DataTypes.ENUM('single_elimination', 'double_elimination'),
             allowNull: false,
+        },
+        group_stage: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
+        generate_groups: {
+            type: DataTypes.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
         },
         team_for_group: {
             type: DataTypes.INTEGER,

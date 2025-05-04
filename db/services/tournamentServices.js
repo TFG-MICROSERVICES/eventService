@@ -14,6 +14,7 @@ export const createTournament = async (data) => {
 
 export const getTournament = async (event_id) => {
     try {
+        console.log(event_id);
         const tournament = await Tournament.findOne({
             where: { event_id: event_id },
         });
@@ -22,7 +23,9 @@ export const getTournament = async (event_id) => {
             generateError('Torneo no encontrado', 404);
         }
 
-        return tournament;
+        const data = await tournament.toJSON();
+
+        return data;
     } catch (error) {
         console.log(error);
         throw error;
