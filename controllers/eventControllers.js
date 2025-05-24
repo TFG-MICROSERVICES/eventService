@@ -3,7 +3,7 @@ import { createLeague, getLeagueById, updateLeague } from '../db/services/league
 import { getResultsByEventIdService } from '../db/services/resultServices.js';
 import { getTeamsEventByIdService } from '../db/services/teamEventServices.js';
 import { createTournament, getTournament, updateTournament } from '../db/services/tournamentServices.js';
-import { createUserEventService, getUserEventByIdService } from '../db/services/userEventServices.js';
+import { createUserEventService, getEventsByUserService, getUserEventByIdService } from '../db/services/userEventServices.js';
 import { eventSchema, updateEventSchema } from '../schemas/eventSchema.js';
 import { leagueSchema, updateLeagueSchema } from '../schemas/leagueSchema.js';
 import { tournamentSchema, updateTournamentSchema } from '../schemas/tournamentSchema.js';
@@ -84,6 +84,34 @@ export const getEventsController = async (req, res, next) => {
         next(error);
     }
 };
+
+export const getEventsByUserController = async (req, res, next) => {
+    try{
+        const { user_id} = req.params;
+        const { sport_id } = req.query;
+
+        if(!user_id) generateError('El id del usuario es requerido', 400);
+
+        const events = await getEventsByUserService(user_id);
+
+        const eventsWithData = await Promise.all(
+            events.map(async (userEvent) => {
+                const event = await getEventById(userEvent.event_id)
+                let base = { owner: userEvent, ...event }
+                return base;
+            })
+        );
+
+        res.status(200).json({
+            status: 200,
+            message: 'Eventos del usuario encontrados correctamente',
+            data: eventsWithData
+        })
+    }catch(error){
+        console.log(error);
+        next(error);
+    }
+}
 
 export const getEventByIdController = async (req, res, next) => {
     try {

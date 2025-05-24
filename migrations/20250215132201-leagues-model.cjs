@@ -7,7 +7,6 @@ module.exports = {
             id: {
                 type: Sequelize.INTEGER,
                 autoIncrement: true,
-                primaryKey: true,
             },
             event_id: {
                 type: Sequelize.INTEGER,
@@ -18,6 +17,7 @@ module.exports = {
                     key: 'id',
                 },
                 onDelete: 'CASCADE',
+                primaryKey: true,
             },
             teams_max: {
                 type: Sequelize.INTEGER,

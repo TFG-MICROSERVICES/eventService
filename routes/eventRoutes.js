@@ -6,12 +6,16 @@ import {
     updateEventController,
     deleteEventController,
     existsNameEvent,
+    getEventsByUserController,
 } from '../controllers/eventControllers.js';
 import { validateApiKey } from '../middlewares/validateApiKey.js';
 const router = Router();
 
 //GET http://localhost:3005/events
 router.get('/', validateApiKey, getEventsController);
+
+//GET http://localhost:3005/events/:event_id
+router.get('/user/:user_id', validateApiKey, getEventsByUserController);
 
 //GET http://localhost:3005/events/:eventId
 router.get('/:event_id', validateApiKey, getEventByIdController);

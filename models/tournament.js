@@ -7,7 +7,6 @@ export const Tournament = database.define(
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
-            primaryKey: true,
         },
         event_id: {
             type: DataTypes.INTEGER,
@@ -18,6 +17,7 @@ export const Tournament = database.define(
                 key: 'id',
             },
             onDelete: 'CASCADE',
+            primaryKey: true,
         },
         elimination_type: {
             type: DataTypes.ENUM('single_elimination', 'double_elimination'),

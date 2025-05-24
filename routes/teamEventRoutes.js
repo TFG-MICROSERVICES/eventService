@@ -8,6 +8,6 @@ router.get('/event/:event_id', validateApiKey, getTeamsEventByIdController);
 
 router.post('/', validateApiKey, createTeamEventController);
 
-router.delete('/event/:event_id', validateApiKey, deleteTeamByIdControler);
+router.delete('/:team_id', validateApiKey, deleteTeamByIdControler);
 
 export default router;

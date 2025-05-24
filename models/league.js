@@ -7,7 +7,6 @@ export const League = database.define(
         id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
-            primaryKey: true,
         },
         event_id: {
             type: DataTypes.INTEGER,
@@ -18,6 +17,7 @@ export const League = database.define(
                 key: 'id',
             },
             onDelete: 'CASCADE',
+            primaryKey: true,
         },
         teams_max: {
             type: DataTypes.INTEGER,
