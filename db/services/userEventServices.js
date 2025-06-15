@@ -5,6 +5,7 @@ import { Event } from '../../models/event.js';
 
 export const createUserEventService = async (data) => {
     try {
+        console.log("data",data);
         const userEvent = await UserEvent.create(data);
 
         if (!userEvent) {

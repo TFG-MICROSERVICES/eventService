@@ -11,6 +11,7 @@ import { generateError } from '../utils/generateError.js';
 
 export const createEventController = async (req, res, next) => {
     try {
+        console.log("body", req.body);
         const validatedEvent = await eventSchema.validateAsync(req.body, { stripUnknown: true });
 
         const event = await createEvent(validatedEvent);
